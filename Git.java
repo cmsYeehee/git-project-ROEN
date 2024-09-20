@@ -62,6 +62,7 @@ public class Git {
         String hash = findHash(file.toPath());
         //Create a new file with the hash in the objects folder
         File fileText = new File ("git/objects/" + hash);
+        
         if(!fileText.exists())
             {
                 fileText.createNewFile();
@@ -70,7 +71,9 @@ public class Git {
         //copy the data into the new file, named target File
         Files.copy(file.toPath(), targetFile);
         //edit the index file
-        BufferedWriter writer = Files.newBufferedWriter(targetFile);
+        File indexFile = new File ("git/objects/index");
+        Path indexPath = indexFile.toPath();
+        BufferedWriter writer = Files.newBufferedWriter(indexPath);
         writer.newLine();
         writer.write(hash);
         writer.write(' ');
