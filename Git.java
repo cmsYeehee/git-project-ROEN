@@ -56,16 +56,35 @@ public class Git {
 
 
     }
-    public static void createBlob(Path path) throws IOException, NoSuchAlgorithmException
+    public static void createBlob(File file) throws IOException, NoSuchAlgorithmException
     {
-        String hash = findHash(path);
+        //find the hash of the content within the file and save it
+        String hash = findHash(file.toPath());
+        //Create a new file with the hash in the objects folder
+        File fileText = new File ("git/objects/" + hash);
+        if(!fileText.exists())
+            {
+                fileText.createNewFile();
+            }
+        Path targetFile = fileText.toPath();
+        //copy the data into the new file, named target File
+        Files.copy(file.toPath(), targetFile);
+        //edit the index file
+        BufferedWriter writer = Files.newBufferedWriter(targetFile);
+        writer.newLine();
+        writer.write(hash);
+        writer.write(' ');
+        writer.write(file.getName());
+        writer.close();
+
 
         
         
-        //read the file
-        //convert that to hash code
-        //put the file into the objects directory
-        //copy the text over
+        //read the file: check
+        //convert that to hash code: check
+        //put the file into the objects directory: check
+        //copy the text over: check
+        // move it into index: check
     }
 
     public static String findHash(Path path) throws IOException, NoSuchAlgorithmException
