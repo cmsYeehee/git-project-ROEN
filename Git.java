@@ -1,14 +1,20 @@
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
+
+
 public class Git {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         
         File file = new File("git");
         File fileObj = new File("git/objects");
         File fileText = new File ("git/objects/index");
+        File testFile = new File("test.txt");
+
         if (fileText.exists()) //does kind of assume that fileText has to exist to delete anything, but I think it's fine because it's my tester, not a method. 
         {
             fileText.delete();
@@ -25,6 +31,9 @@ public class Git {
         {
             System.out.println("Git repositories exist");
         }
+        Git.createBlob(testFile);
+        //need to do stretch goal 2 and 3 now
+
         
 
         //Need to finish stretch goal 1 here by checking for and deleting all the created directories and files
@@ -58,9 +67,9 @@ public class Git {
     }
     public static void createBlob(File file) throws IOException, NoSuchAlgorithmException
     {
-        //find the hash of the content within the file and save it
+        //find the hash of the content within the file and save it: this woks, produces right hash and puts it into the right folder
         String hash = findHash(file.toPath());
-        //Create a new file with the hash in the objects folder
+        //Create a new file with the hash in the objects folder: good
         File fileText = new File ("git/objects/" + hash);
         
         if(!fileText.exists())
@@ -68,16 +77,16 @@ public class Git {
                 fileText.createNewFile();
             }
         Path targetFile = fileText.toPath();
-        //copy the data into the new file, named target File
-        Files.copy(file.toPath(), targetFile);
-        //edit the index file
+        //copy the data into the new file, named target File: doesn't work: good
+        Files.copy(file.toPath(), targetFile,StandardCopyOption.REPLACE_EXISTING); 
+        //edit the index file: good
         File indexFile = new File ("git/objects/index");
         Path indexPath = indexFile.toPath();
         BufferedWriter writer = Files.newBufferedWriter(indexPath);
-        writer.newLine();
         writer.write(hash);
         writer.write(' ');
         writer.write(file.getName());
+        writer.newLine();
         writer.close();
 
 
@@ -94,16 +103,50 @@ public class Git {
     {
         BufferedReader reader = Files.newBufferedReader(path);
         String fileText = "";
+        fileText += reader.readLine();
         while (reader.ready())
         {
-            fileText += reader.readLine() + "\n"; // will this still work for the last line?
+            fileText += "\n" + reader.readLine(); // will this still work for the last line?
         }
-        byte[] inputBytes = fileText.getBytes();
-        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
-        byte[] finalBytes = sha1.digest(inputBytes);
-        String finalHash = finalBytes.toString();
-        return finalHash;
+        //byte[] inputBytes = fileText.getBytes();
+        //MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        //byte[] finalBytes = sha1.digest(inputBytes);
+        String sha1 = "";
+        try
+        {
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(fileText.getBytes("UTF-8"));
+            sha1 = byteToHex(crypt.digest());
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+        return sha1;
+    
+    }
+    private static String byteToHex(final byte[] hash)
+{
+    Formatter formatter = new Formatter();
+    for (byte b : hash)
+    {
+        formatter.format("%02x", b);
+    }
+    String result = formatter.toString();
+    formatter.close();
+    System.out.println (result);
+    return result;
+}
+    
+        
+        
+        //return result;
         //System.out.println(finalHash); //not going to be used laster on
+        
     }
 
-}
