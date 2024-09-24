@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
@@ -51,7 +52,7 @@ public class Git {
             writer.close();
         }
         Git.createBlob(blob2File);
-        Git.createBlob(testFile);
+        Git.createBlob(blobFile);
        
 
         //need to do stretch goal 2 and 3 now
@@ -113,13 +114,13 @@ public class Git {
         Path indexPath = indexFile.toPath();
 
         //confused on why index function isn't working
-        BufferedWriter writer = Files.newBufferedWriter(indexPath);
+        BufferedWriter writer = Files.newBufferedWriter(indexPath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         //writer.write(currentFile);
         writer.write(hash);
         writer.write(' ');
         writer.write(file.getName());
-        //writer.write("\n");
-        writer.newLine();
+        writer.write("\n");
+        //writer.newLine();
         writer.close();
 
 
