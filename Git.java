@@ -95,9 +95,8 @@ public class Git {
             
          }
     }
-    public static void initCheckAndDeleteTester(File fileText, File fileObj, File file) throws IOException
+    public static void deleteFiles(File fileText, File fileObj, File file) throws IOException
     {
-        //checks to see if all the files have been deleted each time you run through it
         boolean deleted1 = false;
         boolean deleted2 = false;
         boolean deleted3 = false;
@@ -123,15 +122,24 @@ public class Git {
             {
                 System.out.println("deleted");
             }
-            
+
         }
-        //initializes the repository
-            initRepo();
-        //checks to see if files/directories exists after we create them
+    }
+    public static void checkForFiles(File fileText, File fileObj, File file) throws IOException
+    {
         if (file.exists() && fileObj.exists() && fileText.exists())
         {
             System.out.println("Git repositories exist");
         }
+    }
+    public static void initCheckAndDeleteTester(File fileText, File fileObj, File file) throws IOException
+    {
+        //checks to see if all the files have been deleted each time you run through it
+        deleteFiles(fileText, fileObj, file);
+        //initializes the repository
+            initRepo();
+        //checks to see if files/directories exists after we create them
+        checkForFiles(fileText, fileObj, file);
     }
     public static String fileReader (File file) throws IOException
     {
