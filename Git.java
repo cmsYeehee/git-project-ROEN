@@ -6,9 +6,13 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 public class Git {
+    public boolean compression = true;
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         
         File file = new File("git");
@@ -51,7 +55,7 @@ public class Git {
             writer.write("Taasdofefawefahawefhwaeog");
             writer.close();
         }
-        Git.createBlob(blob2File);
+        Git.createBlobWithZip(blob2File);
         Git.createBlob(blobFile);
        
 
@@ -132,6 +136,69 @@ public class Git {
         //copy the text over: check
         // move it into index: check
     }
+    public static byte[] compressBlob(File file) throws IOException
+    {
+        BufferedReader reader = Files.newBufferedReader(file.toPath());
+        String fileBlobText = "";
+        fileBlobText += reader.readLine();
+        while (reader.ready())
+        {
+            fileBlobText += "\n" + reader.readLine(); // will this still work for the last line?
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GZIPOutputStream zos = new GZIPOutputStream(baos);
+
+            zos.write(fileBlobText.getBytes("UTF-8"));
+            zos.finish();
+            zos.flush();
+
+            byte[] udpBuffer = baos.toByteArray();
+            return udpBuffer;
+
+    }
+    public static void createBlobWithZip(File file) throws IOException, NoSuchAlgorithmException
+    {
+            byte [] compressed = compressBlob(file);
+            String sha1 = "";
+            String compressedString = compressed.toString();
+        try
+        {
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(compressed);
+            sha1 = byteToHex(crypt.digest());
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+        File fileText = new File ("git/objects/" + sha1);
+        
+        if(!fileText.exists())
+            {
+                fileText.createNewFile();
+            }
+        Path targetFile = fileText.toPath();
+        //copy the data into the new file, named target File: doesn't work: good
+        BufferedWriter compressionWriter = Files.newBufferedWriter(targetFile, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        compressionWriter.write(compressedString);
+        compressionWriter.close();
+        //edit the index file: good
+        File indexFile = new File ("git/objects/index");
+        Path indexPath = indexFile.toPath();
+
+        //confused on why index function isn't working
+        BufferedWriter writer = Files.newBufferedWriter(indexPath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        //writer.write(currentFile);
+        writer.write(sha1);
+        writer.write(' ');
+        writer.write(file.getName());
+        writer.write("\n");
+        //writer.newLine();
+        writer.close();
+
+    }
+
 
     public static String findHash(Path path) throws IOException, NoSuchAlgorithmException
     {
