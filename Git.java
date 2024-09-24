@@ -14,7 +14,10 @@ public class Git {
         File fileObj = new File("git/objects");
         File fileText = new File ("git/objects/index");
         File testFile = new File("test.txt");
-
+        File blobFile = new File ("data");
+        File blob2File = new File ("dataBlob");
+        ResetTestFile(blobFile);
+        ResetTestFile(blob2File);
         if (fileText.exists()) //does kind of assume that fileText has to exist to delete anything, but I think it's fine because it's my tester, not a method. 
         {
             fileText.delete();
@@ -31,12 +34,38 @@ public class Git {
         {
             System.out.println("Git repositories exist");
         }
+        if (!blobFile.exists())
+        {
+            blobFile.createNewFile();
+            Path blobPath = blobFile.toPath();
+            BufferedWriter writer = Files.newBufferedWriter(blobPath);
+            writer.write("This is a new file. This data can change");
+            writer.close();
+        }
+        if (!blob2File.exists())
+        {
+            blob2File.createNewFile();
+            Path blob2Path = blob2File.toPath();
+            BufferedWriter writer = Files.newBufferedWriter(blob2Path);
+            writer.write("Taasdofefawefahawefhwaeog");
+            writer.close();
+        }
+        Git.createBlob(blob2File);
         Git.createBlob(testFile);
+       
+
         //need to do stretch goal 2 and 3 now
 
         
-
         //Need to finish stretch goal 1 here by checking for and deleting all the created directories and files
+    }
+    public static void ResetTestFile(File file)
+    {
+        if (file.exists())
+        {
+            file.delete();
+        }
+
     }
     public static void initRepo() throws IOException
     {
@@ -82,10 +111,14 @@ public class Git {
         //edit the index file: good
         File indexFile = new File ("git/objects/index");
         Path indexPath = indexFile.toPath();
+
+        //confused on why index function isn't working
         BufferedWriter writer = Files.newBufferedWriter(indexPath);
+        //writer.write(currentFile);
         writer.write(hash);
         writer.write(' ');
         writer.write(file.getName());
+        //writer.write("\n");
         writer.newLine();
         writer.close();
 
@@ -139,7 +172,7 @@ public class Git {
     }
     String result = formatter.toString();
     formatter.close();
-    System.out.println (result);
+    //System.out.println (result);
     return result;
 }
     
