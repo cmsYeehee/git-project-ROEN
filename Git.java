@@ -12,33 +12,33 @@ import java.util.zip.ZipOutputStream;
 
 
 public class Git {
+    //universal compression toggle factor
     public static boolean compressionToggle = false;
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         
         File file = new File("git");
         File fileObj = new File("git/objects");
         File fileText = new File ("git/objects/index");
-        File testFile = new File("test.txt");
         File blobFile = new File ("data");
         File blob2File = new File ("dataBlob");
+        
+        //stretch goal 1: checks for a deletes all created files and directories to ensure their creation
+        initCheckAndDeleteTester( fileText,  fileObj,  file);
+        createBlobTester(blobFile, blob2File, fileText);
+    
+
+       
+
+
+        
+        //Need to finish stretch goal 1 here by checking for and deleting all the created directories and files
+    }
+    public static void createBlobTester(File blobFile, File blob2File, File fileText) throws IOException, NoSuchAlgorithmException
+    {
+        //resets the TestFiles by deleting them
         ResetTestFile(blobFile);
         ResetTestFile(blob2File);
-        if (fileText.exists()) //does kind of assume that fileText has to exist to delete anything, but I think it's fine because it's my tester, not a method. 
-        {
-            fileText.delete();
-            fileObj.delete();
-            file.delete();
-            if (!file.exists()&& !fileObj.exists() && !fileText.exists() )
-            {
-                System.out.println("deleted");
-            }
-            
-        }
-        initRepo();
-        if (file.exists() && fileObj.exists() && fileText.exists())
-        {
-            System.out.println("Git repositories exist");
-        }
+        //writes into both files
         if (!blobFile.exists())
         {
             blobFile.createNewFile();
@@ -55,13 +55,16 @@ public class Git {
             writer.write("Taasdofefawefahawefhwaeog");
             writer.close();
         }
-        //Git.createBlob(blob2File);
+        //Creates the blobs
         Git.createBlob(blobFile);
         Git.createBlob(blob2File);
+        //This would be no compression blob creation
          if (!compressionToggle)
          {
+            //manually inputted for the text inside, so don't change the text inside unless you want to change these lines
             File fileBlob = new File ("git/objects/e057d4ea363fbab414a874371da253dba3d713bc");
-            File fileBlob2 = new File ("git/objects/873285fe864b9869ee9332a8baa58941ffbbd447");
+            File fileBlob2 = new File ("git/objects/873285fe864b9869ee9332a8baa58941ffbbd447"); 
+            //determines if the blobs exist with the right name in the object folder
             if (fileBlob.exists() & fileBlob2.exists())
             {
                 System.out.println("hash's correctly and puts files into the objects folder");
@@ -69,6 +72,7 @@ public class Git {
             else{
                 System.out.println("hash's incorrectly or does not put files into the objects folder");
             }
+            //determines if the data inside the file is correct
             if (fileReader(fileBlob).equals("derp") && fileReader(fileBlob2).equals("Taasdofefawefahawefhwaeog"))
             {
                 System.out.println("data inside the file is correct");
@@ -80,22 +84,54 @@ public class Git {
             String fileIndexText = "";
             fileIndexText = fileReader(fileText);
             
-
+            //determines if the index file is correctly updated
             if (fileIndexText.equals("e057d4ea363fbab414a874371da253dba3d713bc data\n873285fe864b9869ee9332a8baa58941ffbbd447 dataBlob"))
             {
-                System.out.println("input file correct");
+                System.out.println("index file correct");
             }
             else{
-                System.out.println("input file incorrect");
+                System.out.println("index file incorrect");
             }
             
          }
-       
-
-        //need to do stretch goal 2 and 3 now
-
-        
-        //Need to finish stretch goal 1 here by checking for and deleting all the created directories and files
+    }
+    public static void initCheckAndDeleteTester(File fileText, File fileObj, File file) throws IOException
+    {
+        //checks to see if all the files have been deleted each time you run through it
+        boolean deleted1 = false;
+        boolean deleted2 = false;
+        boolean deleted3 = false;
+        if (fileText.exists()) 
+        {
+             deleted1 = fileText.delete();
+            if (fileObj.exists())
+            {
+                File [] files = fileObj.listFiles();
+                for (int i = 0; i < files.length; i ++)
+                {
+                    files[i].delete();
+                }
+                 deleted2 = fileObj.delete();
+                if (file.exists())
+                {
+                     deleted3 = file.delete();
+                }
+            }
+            
+            
+            if (deleted1 && deleted2 && deleted3)
+            {
+                System.out.println("deleted");
+            }
+            
+        }
+        //initializes the repository
+            initRepo();
+        //checks to see if files/directories exists after we create them
+        if (file.exists() && fileObj.exists() && fileText.exists())
+        {
+            System.out.println("Git repositories exist");
+        }
     }
     public static String fileReader (File file) throws IOException
     {
@@ -121,6 +157,7 @@ public class Git {
         File file = new File("git");
         File fileObj = new File("git/objects");
         File fileText = new File ("git/objects/index");
+        //checks to see if initialization already occurred, and if git repository already existed
         if (file.exists() && fileObj.exists() && fileText.exists())
         {
             System.out.println("Git repository already exists");
@@ -145,6 +182,7 @@ public class Git {
     }
     public static void createBlob(File file) throws IOException, NoSuchAlgorithmException
     {
+        //if compression Toggle is on, create the files using the compression factors
         if (compressionToggle)
         {
             createBlobWithZip(file);
@@ -152,9 +190,9 @@ public class Git {
         else{
 
         
-        //find the hash of the content within the file and save it: this woks, produces right hash and puts it into the right folder
+        //find the hash of the content within the file and save it
         String hash = findHash(file.toPath());
-        //Create a new file with the hash in the objects folder: good
+        //Create a new file with the hash in the objects folder
         File fileText = new File ("git/objects/" + hash);
         
         if(!fileText.exists())
@@ -162,9 +200,9 @@ public class Git {
                 fileText.createNewFile();
             }
         Path targetFile = fileText.toPath();
-        //copy the data into the new file, named target File: doesn't work: good
+        //copy the data into the new file, named target File
         Files.copy(file.toPath(), targetFile,StandardCopyOption.REPLACE_EXISTING); 
-        //edit the index file: good
+        //edit the index file
         File indexFile = new File ("git/objects/index");
         Path indexPath = indexFile.toPath();
 
