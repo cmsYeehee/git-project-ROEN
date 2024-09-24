@@ -69,14 +69,19 @@ public class Git {
             else{
                 System.out.println("hash's incorrectly or does not put files into the objects folder");
             }
-            BufferedReader reader = Files.newBufferedReader(fileText.toPath());
-            String fileBlobText = "";
-            fileBlobText += reader.readLine();
-            while (reader.ready())
+            if (fileReader(fileBlob).equals("derp") && fileReader(fileBlob2).equals("Taasdofefawefahawefhwaeog"))
             {
-            fileBlobText += "\n" + reader.readLine(); // will this still work for the last line?
+                System.out.println("data inside the file is correct");
             }
-            if (fileBlobText.equals("e057d4ea363fbab414a874371da253dba3d713bc data\n873285fe864b9869ee9332a8baa58941ffbbd447 dataBlob"))
+            else{
+                System.out.println("data inside the file is incorrect");
+            }
+            
+            String fileIndexText = "";
+            fileIndexText = fileReader(fileText);
+            
+
+            if (fileIndexText.equals("e057d4ea363fbab414a874371da253dba3d713bc data\n873285fe864b9869ee9332a8baa58941ffbbd447 dataBlob"))
             {
                 System.out.println("input file correct");
             }
@@ -91,6 +96,17 @@ public class Git {
 
         
         //Need to finish stretch goal 1 here by checking for and deleting all the created directories and files
+    }
+    public static String fileReader (File file) throws IOException
+    {
+        BufferedReader reader = Files.newBufferedReader(file.toPath());
+            String fileBlobText = "";
+            fileBlobText += reader.readLine();
+            while (reader.ready())
+            {
+            fileBlobText += "\n" + reader.readLine(); // will this still work for the last line?
+            }
+            return fileBlobText;
     }
     public static void ResetTestFile(File file)
     {
