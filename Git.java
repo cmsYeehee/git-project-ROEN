@@ -12,7 +12,7 @@ import java.util.zip.ZipOutputStream;
 
 
 public class Git {
-    public boolean compression = true;
+    public static boolean compressionToggle = false;
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         
         File file = new File("git");
@@ -44,7 +44,7 @@ public class Git {
             blobFile.createNewFile();
             Path blobPath = blobFile.toPath();
             BufferedWriter writer = Files.newBufferedWriter(blobPath);
-            writer.write("This is a new file. This data can change");
+            writer.write("derp");
             writer.close();
         }
         if (!blob2File.exists())
@@ -55,8 +55,36 @@ public class Git {
             writer.write("Taasdofefawefahawefhwaeog");
             writer.close();
         }
-        Git.createBlobWithZip(blob2File);
+        //Git.createBlob(blob2File);
         Git.createBlob(blobFile);
+        Git.createBlob(blob2File);
+         if (!compressionToggle)
+         {
+            File fileBlob = new File ("git/objects/e057d4ea363fbab414a874371da253dba3d713bc");
+            File fileBlob2 = new File ("git/objects/873285fe864b9869ee9332a8baa58941ffbbd447");
+            if (fileBlob.exists() & fileBlob2.exists())
+            {
+                System.out.println("hash's correctly and puts files into the objects folder");
+            }
+            else{
+                System.out.println("hash's incorrectly or does not put files into the objects folder");
+            }
+            BufferedReader reader = Files.newBufferedReader(fileText.toPath());
+            String fileBlobText = "";
+            fileBlobText += reader.readLine();
+            while (reader.ready())
+            {
+            fileBlobText += "\n" + reader.readLine(); // will this still work for the last line?
+            }
+            if (fileBlobText.equals("e057d4ea363fbab414a874371da253dba3d713bc data\n873285fe864b9869ee9332a8baa58941ffbbd447 dataBlob"))
+            {
+                System.out.println("input file correct");
+            }
+            else{
+                System.out.println("input file incorrect");
+            }
+            
+         }
        
 
         //need to do stretch goal 2 and 3 now
@@ -101,6 +129,13 @@ public class Git {
     }
     public static void createBlob(File file) throws IOException, NoSuchAlgorithmException
     {
+        if (compressionToggle)
+        {
+            createBlobWithZip(file);
+        }
+        else{
+
+        
         //find the hash of the content within the file and save it: this woks, produces right hash and puts it into the right folder
         String hash = findHash(file.toPath());
         //Create a new file with the hash in the objects folder: good
@@ -126,6 +161,7 @@ public class Git {
         writer.write("\n");
         //writer.newLine();
         writer.close();
+        }
 
 
         
@@ -160,7 +196,6 @@ public class Git {
     {
             byte [] compressed = compressBlob(file);
             String sha1 = "";
-            String compressedString = compressed.toString();
         try
         {
             MessageDigest crypt = MessageDigest.getInstance("SHA-1");
@@ -180,9 +215,7 @@ public class Git {
             }
         Path targetFile = fileText.toPath();
         //copy the data into the new file, named target File: doesn't work: good
-        BufferedWriter compressionWriter = Files.newBufferedWriter(targetFile, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        compressionWriter.write(compressedString);
-        compressionWriter.close();
+        Files.write(targetFile, compressed);
         //edit the index file: good
         File indexFile = new File ("git/objects/index");
         Path indexPath = indexFile.toPath();
