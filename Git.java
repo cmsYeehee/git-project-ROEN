@@ -191,24 +191,7 @@ public class Git {
             // copy the data into the new file, named target File
             Files.copy(file.toPath(), targetFile, StandardCopyOption.REPLACE_EXISTING);
             // edit the index file
-            File indexFile = new File("git/objects/index");
-            Path indexPath = indexFile.toPath();
-
-            // confused on why index function isn't working
-            BufferedWriter writer = Files.newBufferedWriter(indexPath, StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
-            // writer.write(currentFile);
-            if (file.isDirectory()) {
-                writer.write("tree ");
-            } else {
-                writer.write("blob ");
-            }
-            writer.write(hash);
-            writer.write(' ');
-            writer.write(file.getName());
-            writer.write("\n");
-            // writer.newLine();
-            writer.close();
+            addToIndexFile(file);
         }
 
         // read the file: check
@@ -216,6 +199,28 @@ public class Git {
         // put the file into the objects directory: check
         // copy the text over: check
         // move it into index: check
+    }
+
+    public static void addToIndexFile(File file) throws NoSuchAlgorithmException, IOException {
+        String hash = findHash(file.toPath());
+
+        File indexFile = new File("git/objects/index");
+        Path indexPath = indexFile.toPath();
+
+        // confused on why index function isn't working
+        BufferedWriter writer = Files.newBufferedWriter(indexPath, StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND);
+        // writer.write(currentFile);
+        if (file.isDirectory()) {
+            writer.write("tree ");
+        } else {
+            writer.write("blob ");
+        }
+        writer.write(hash);
+        writer.write(' ');
+        writer.write(file.getName());
+        writer.write("\n");
+        writer.close();
     }
 
     public static byte[] compressBlob(File file) throws IOException {
@@ -313,15 +318,47 @@ public class Git {
     // System.out.println(finalHash); //not going to be used laster on
 
     public static void addTree(File file) throws NoSuchAlgorithmException, IOException {
-        createBlob(file);
-        File[] arrFiles = file.listFiles();
-        for (int i = 0; i < arrFiles.length; i++) {
-            if (arrFiles[i].isDirectory()) {
-                addTree(arrFiles[i]);
-            } else {
-                createBlob(arrFiles[i]);
+        StringBuilder sB = new StringBuilder();
+        if (file.isDirectory()) {
+            File[] arrFiles = file.listFiles();
+            for (int i = 0; i < arrFiles.length; i++) {
+                if (arrFiles[i].isDirectory()) {
+                    addTree(arrFiles[i]);
+                } else {
+                    createBlob(arrFiles[i]);
+                    sB.append("blob " + findHash(arrFiles[i].toPath()) + arrFiles[i].getName());
+                }
             }
         }
+        String sha1 = "";
+        try {
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(sB.toString().getBytes("UTF-8"));
+            sha1 = byteToHex(crypt.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        File indexFile = new File("git/objects/index");
+        Path indexPath = indexFile.toPath();
+
+        BufferedWriter writer = Files.newBufferedWriter(indexPath, StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND);
+        // writer.write(currentFile);
+        if (file.isDirectory()) {
+            writer.write("tree ");
+        } else {
+            writer.write("blob ");
+        }
+        writer.write(sha1);
+        writer.write(' ');
+        writer.write(file.getName());
+        writer.write("\n");
+        writer.close();
+
     }
 
     public static void addTreeTester(File directoryFile, File random, File random2, File fileText)
