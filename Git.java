@@ -22,9 +22,9 @@ public class Git {
         // File blobFile = new File("data");
         // File blob2File = new File("dataBlob");
 
-        File directoryFile = new File("git/tree");
-        File random = new File("git/tree/random");
-        File random2 = new File("git/tree/random/random2.txt");
+        File directoryFile = new File("git/directoryFile");
+        File random = new File("git/directoryFile/random");
+        File random2 = new File("git/directoryFile/random/random2.txt");
 
         // // stretch goal 1: checks for a deletes all created files and directories to
         // // ensure their creation
@@ -218,7 +218,7 @@ public class Git {
         }
         writer.write(hash);
         writer.write(' ');
-        writer.write(file.getName());
+        writer.write(file.getPath());
         writer.write("\n");
         writer.close();
     }
@@ -326,7 +326,7 @@ public class Git {
                     addTree(arrFiles[i]);
                 } else {
                     createBlob(arrFiles[i]);
-                    sB.append("blob " + findHash(arrFiles[i].toPath()) + arrFiles[i].getName());
+                    sB.append("blob " + findHash(arrFiles[i].toPath()) + arrFiles[i].getPath());
                 }
             }
         }
@@ -355,7 +355,7 @@ public class Git {
         }
         writer.write(sha1);
         writer.write(' ');
-        writer.write(file.getName());
+        writer.write(file.getPath());
         writer.write("\n");
         writer.close();
 
