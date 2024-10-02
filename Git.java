@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -404,6 +405,9 @@ public class Git {
     public static void MakeHead() throws IOException
     {
         File Head = new File("git/HEAD");
+        Path commitPath = Head.toPath();
+        BufferedWriter writer = Files.newBufferedWriter(commitPath);
+        writer.close();
         if (Head.createNewFile() == true)
         {
             System.out.println("HEAD is made");
@@ -414,17 +418,20 @@ public class Git {
         return;
     }
 
-    public static String MakeCommitFile(String author, String date, String message) throws IOException
+    public static String MakeCommitFile(String author, String date, String message) throws IOException, NoSuchAlgorithmException
     {
+        File Head = new File("git/HEAD");
+        byte[] data = Files.readAllBytes(Head.toPath());
+        String content = new String(data, StandardCharsets.UTF_8);
+        System.out.println("The content is " + content);
         File toCommit = new File("git/objects/hash.txt");
         Path commitPath = toCommit.toPath();
         BufferedWriter writer = Files.newBufferedWriter(commitPath);
-        writer.write("tree:");
-        writer.write("\nparent " );
+        writer.write("tree ");
+        writer.write("\nparent " + content);
         writer.write("\nauthor " + author);
         writer.write("\ndate " + date);
         writer.write("\nmessage " + message);
-
         writer.close();
         if (toCommit.createNewFile() == true)
         {
