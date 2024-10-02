@@ -6,6 +6,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -36,8 +37,7 @@ public class Git {
         // Need to finish stretch goal 1 here by checking for and deleting all the
         // created directories and files
         MakeCommitFile("Christian Stubbeman", "testing");
-        MakeSnapshot();
-
+        //MakeSnapshot();
     }
 
     public static void createBlobTester(File blobFile, File blob2File, File fileText)
@@ -441,25 +441,56 @@ public class Git {
         }
         return "";
     }
-    public static void MakeSnapshot()
+    //Makes a snapshot
+    public static void MakeSnapshot() throws NoSuchAlgorithmException, IOException
     {
-        File directory = new File("./");
-        File testSnapshot = new File("testSnapshot");
-        testSnapshot.mkdir();
-        for (File subfile : directory.listFiles())
+        File Snapshot = new File("git/Snapshot");
+        Snapshot.mkdir();
+        File index = new File("git/index");
+        BufferedReader br = new BufferedReader(new FileReader(index));
+        String line = br.readLine();
+        ArrayList<String> lines = new ArrayList<String>();
+        //Checking through index to determine what to add to the snapshot folder.
+        while (line != null)
         {
-            if (subfile.isDirectory())
+            lines.add(line);
+            line = br.readLine();
+            //Have to go from back to create directories
+        }
+        br.close();
+        for (int i = lines.size(); i > 1; i --)
+        {
+            String theLine = lines.get(i-2);
+            System.out.println("the Line is " + theLine);
+            if (theLine.substring(0,4).equals("blob"))
+            {  
+            String path = theLine.substring(46);
+            File newFile = new File("./git/Snapshot/" + path);
+            File pastFile = new File("./" + path);
+            Path newPath = newFile.toPath();
+            System.out.println("./" + path);
+            BufferedWriter writer = Files.newBufferedWriter(newPath);
+            byte[] data = Files.readAllBytes(pastFile.toPath());
+            String content = new String(data, StandardCharsets.UTF_8);
+            System.out.println("the content I want to write is " + content);
+            writer.write(content);
+            writer.close();
+            if (newFile.createNewFile())
             {
-                System.out.println(subfile.getName() + " is a dir");
-            }   
-            else
+                createBlob(pastFile);
+            }
+            }
+            else if (theLine.substring(0,4).equals("tree"))
             {
-                System.out.println(subfile.getName() + " is a file");
+                String path = theLine.substring(46);
+                File dirToMake = new File("./git/Snapshot/" + path);
+                dirToMake.mkdir();
             }
         }
         return;
 
     }
+    //uses the index file to determine what to put in the snapshot.
 }
 
 // isFile()
