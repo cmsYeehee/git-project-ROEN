@@ -399,6 +399,19 @@ public class Git {
         // }
         // }
     }
+    //Makes head for git
+    public static void MakeHead() throws IOException
+    {
+        File Head = new File("git/HEAD");
+        if (Head.createNewFile() == true)
+        {
+            System.out.println("HEAD is made");
+        }
+        else{
+            System.out.println("HEAD is not made");
+        }
+        return;
+    }
 }
 
 // isFile()
