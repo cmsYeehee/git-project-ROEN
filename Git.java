@@ -1,4 +1,5 @@
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -322,13 +323,16 @@ public class Git {
 
     public static void addTree(File file) throws NoSuchAlgorithmException, IOException {
         StringBuilder sB = new StringBuilder();
+        String allFiles = "";
         if (file.isDirectory()) {
             File[] arrFiles = file.listFiles();
             for (int i = 0; i < arrFiles.length; i++) {
                 if (arrFiles[i].isDirectory()) {
                     addTree(arrFiles[i]);
+                    allFiles += ("tree " + getDirectoryHash(arrFiles[i]) + " " + arrFiles[i].getName() + "\n");
                 } else {
                     createBlob(arrFiles[i]);
+                    allFiles += "blob " +  hashBlob(Files.readAllBytes(arrFiles[i].toPath())) + " " + arrFiles[i].getName() + "\n";
                     sB.append("blob " + findHash(arrFiles[i].toPath()) + arrFiles[i].getPath());
                 }
             }
@@ -346,13 +350,17 @@ public class Git {
         }
 
         File indexFile = new File("git/index");
+        File objectFile = new File("git/objects/" + sha1);
         Path indexPath = indexFile.toPath();
-
+        Path objectPath = objectFile.toPath();
+        BufferedWriter OBJwriter = Files.newBufferedWriter(objectPath, StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND);
         BufferedWriter writer = Files.newBufferedWriter(indexPath, StandardOpenOption.CREATE,
                 StandardOpenOption.APPEND);
         // writer.write(currentFile);
         if (file.isDirectory()) {
             writer.write("tree ");
+            OBJwriter.write(allFiles);
         } else {
             writer.write("blob ");
         }
@@ -361,6 +369,7 @@ public class Git {
         writer.write(file.getPath());
         writer.write("\n");
         writer.close();
+        OBJwriter.close();
 
     }
 
@@ -497,8 +506,41 @@ public class Git {
         return "";
     }
     //uses the index file to determine what to put in the snapshot.
+//Gets the specific hash for a directory
+public static String getDirectoryHash(File file) throws NoSuchAlgorithmException, IOException
+{
+    File directory = file;
+    String allFiles = "";
+    byte[] hashes;
+    for (File subfile : directory.listFiles())
+    {
+        if (subfile.isDirectory())
+        {
+            //Recursively calls itself
+            allFiles += getDirectoryHash(subfile);
+        }
+        else
+        {
+            allFiles += "blob " +  hashBlob(Files.readAllBytes(subfile.toPath())) + " " + subfile.getName() + "\n";
+        }
+    }
+    hashes = allFiles.getBytes();
+    String finalHash;
+    finalHash = hashBlob(hashes);
+    System.out.println("the final hash is " + finalHash);
+    return finalHash;
 }
+public static String hashBlob(byte[] data) throws IOException, NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] messageDigest = md.digest(data);
+        BigInteger n = new BigInteger(1, messageDigest);
+        String hash = n.toString(16);
+        while (hash.length() < 40)
+            hash = "0" + hash;
+        return hash;
+    }
 
 // isFile()
 // isDirectory()
 // listFiles()
+} 
