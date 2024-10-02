@@ -487,11 +487,25 @@ public class Git {
         return;
 
     }
+    //gets the Hash for this tree and updates HEAD
     public static String makeTreeForCommit() throws NoSuchAlgorithmException, IOException
     {
         File snapshot = new File("./git/Snapshot");
-        return getDirectoryHash(snapshot);
+        File Head = new File("./git/HEAD");
+        Path commitPath = Head.toPath();
+        String str = getDirectoryHash(snapshot);
+        BufferedWriter writer = Files.newBufferedWriter(commitPath);
+        writer.write(str);
+        writer.close();
+
+        return str;
     }
+
+
+
+
+
+
     //uses the index file to determine what to put in the snapshot.
 //Gets the specific hash for a directory
 public static String getDirectoryHash(File file) throws NoSuchAlgorithmException, IOException
