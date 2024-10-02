@@ -350,7 +350,7 @@ public class Git {
         }
 
         File indexFile = new File("git/index");
-        File objectFile = new File("git/objects/" + sha1);
+        File objectFile = new File("git/objects/" + getDirectoryHash(file));
         Path indexPath = indexFile.toPath();
         Path objectPath = objectFile.toPath();
         BufferedWriter OBJwriter = Files.newBufferedWriter(objectPath, StandardOpenOption.CREATE,
