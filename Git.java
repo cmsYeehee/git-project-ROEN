@@ -15,7 +15,7 @@ public class Git {
     public static boolean compressionToggle = false;
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-
+        MakeHead();
         File file = new File("git");
         File fileObj = new File("git/objects");
         File fileText = new File("git/index");
@@ -34,6 +34,7 @@ public class Git {
 
         // Need to finish stretch goal 1 here by checking for and deleting all the
         // created directories and files
+        MakeCommitFile("Christian Stubbeman", "October 2, 2024", "testing");
 
     }
 
@@ -411,6 +412,25 @@ public class Git {
             System.out.println("HEAD is not made");
         }
         return;
+    }
+
+    public static String MakeCommitFile(String author, String date, String message) throws IOException
+    {
+        File toCommit = new File("git/objects/hash.txt");
+        Path commitPath = toCommit.toPath();
+        BufferedWriter writer = Files.newBufferedWriter(commitPath);
+        writer.write("tree:");
+        writer.write("\nparent " );
+        writer.write("\nauthor " + author);
+        writer.write("\ndate " + date);
+        writer.write("\nmessage " + message);
+
+        writer.close();
+        if (toCommit.createNewFile() == true)
+        {
+            System.out.println("commit file outline made");
+        }
+        return "";
     }
 }
 
