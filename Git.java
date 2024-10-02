@@ -18,18 +18,18 @@ public class Git {
 
         File file = new File("git");
         File fileObj = new File("git/objects");
-        File fileText = new File("git/objects/index");
-        // File blobFile = new File("data");
-        // File blob2File = new File("dataBlob");
+        File fileText = new File("git/index");
+        File blobFile = new File("data");
+        File blob2File = new File("dataBlob");
 
-        File directoryFile = new File("git/directoryFile");
-        File random = new File("git/directoryFile/random");
-        File random2 = new File("git/directoryFile/random/random2.txt");
+        File directoryFile = new File("directoryFile");
+        File random = new File("directoryFile/random");
+        File random2 = new File("directoryFile/random/random2.txt");
 
         // // stretch goal 1: checks for a deletes all created files and directories to
         // // ensure their creation
         initCheckAndDeleteTester(fileText, fileObj, file);
-        // createBlobTester(blobFile, blob2File, fileText);
+        createBlobTester(blobFile, blob2File, fileText);
         addTreeTester(directoryFile, random, random2, fileText);
 
         // Need to finish stretch goal 1 here by checking for and deleting all the
@@ -153,7 +153,7 @@ public class Git {
     public static void initRepo() throws IOException {
         File file = new File("git");
         File fileObj = new File("git/objects");
-        File fileText = new File("git/objects/index");
+        File fileText = new File("git/index");
         // checks to see if initialization already occurred, and if git repository
         // already existed
         if (file.exists() && fileObj.exists() && fileText.exists()) {
@@ -204,7 +204,7 @@ public class Git {
     public static void addToIndexFile(File file) throws NoSuchAlgorithmException, IOException {
         String hash = findHash(file.toPath());
 
-        File indexFile = new File("git/objects/index");
+        File indexFile = new File("git/index");
         Path indexPath = indexFile.toPath();
 
         // confused on why index function isn't working
@@ -262,7 +262,7 @@ public class Git {
         // copy the data into the new file, named target File: doesn't work: good
         Files.write(targetFile, compressed);
         // edit the index file: good
-        File indexFile = new File("git/objects/index");
+        File indexFile = new File("git/index");
         Path indexPath = indexFile.toPath();
 
         // confused on why index function isn't working
@@ -342,7 +342,7 @@ public class Git {
             e.printStackTrace();
         }
 
-        File indexFile = new File("git/objects/index");
+        File indexFile = new File("git/index");
         Path indexPath = indexFile.toPath();
 
         BufferedWriter writer = Files.newBufferedWriter(indexPath, StandardOpenOption.CREATE,
@@ -379,7 +379,7 @@ public class Git {
             random2.createNewFile();
             Path blobPath = random2.toPath();
             BufferedWriter writer = Files.newBufferedWriter(blobPath);
-            writer.write("derp");
+            writer.write("derp2");
             writer.close();
         }
 
