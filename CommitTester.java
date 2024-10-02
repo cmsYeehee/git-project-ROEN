@@ -6,6 +6,6 @@ public class CommitTester {
     {
         Git test = new Git();
         test.MakeSnapshot();
-        test.makeTreeForCommit();
+        System.out.println(test.makeTreeForCommit());
     }
 }

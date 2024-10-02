@@ -322,33 +322,21 @@ public class Git {
     // System.out.println(finalHash); //not going to be used laster on
 
     public static void addTree(File file) throws NoSuchAlgorithmException, IOException {
-        StringBuilder sB = new StringBuilder();
         String allFiles = "";
+        String hash = getDirectoryHash(file);
+        String inObj = "tree " + hash + " " + file.getPath() + "\n";
         if (file.isDirectory()) {
             File[] arrFiles = file.listFiles();
             for (int i = 0; i < arrFiles.length; i++) {
                 if (arrFiles[i].isDirectory()) {
                     addTree(arrFiles[i]);
-                    allFiles += ("tree " + getDirectoryHash(arrFiles[i]) + " " + arrFiles[i].getName() + "\n");
+                    allFiles += ("tree " + getDirectoryHash(arrFiles[i]) + " " + arrFiles[i].getPath() + "\n");
                 } else {
                     createBlob(arrFiles[i]);
-                    allFiles += "blob " +  hashBlob(Files.readAllBytes(arrFiles[i].toPath())) + " " + arrFiles[i].getName() + "\n";
-                    sB.append("blob " + findHash(arrFiles[i].toPath()) + arrFiles[i].getPath());
+                    allFiles += "blob " +  hashBlob(Files.readAllBytes(arrFiles[i].toPath())) + " " + arrFiles[i].getPath() + "\n";
                 }
             }
         }
-        String sha1 = "";
-        try {
-            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-            crypt.reset();
-            crypt.update(sB.toString().getBytes("UTF-8"));
-            sha1 = byteToHex(crypt.digest());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
         File indexFile = new File("git/index");
         File objectFile = new File("git/objects/" + getDirectoryHash(file));
         Path indexPath = indexFile.toPath();
@@ -359,15 +347,15 @@ public class Git {
                 StandardOpenOption.APPEND);
         // writer.write(currentFile);
         if (file.isDirectory()) {
-            writer.write("tree ");
             OBJwriter.write(allFiles);
+            writer.write(inObj);
+            writer.close();
+            OBJwriter.close();
+            return;
         } else {
-            writer.write("blob ");
+            OBJwriter.write(allFiles);
+            writer.write(inObj);
         }
-        writer.write(sha1);
-        writer.write(' ');
-        writer.write(file.getPath());
-        writer.write("\n");
         writer.close();
         OBJwriter.close();
 
@@ -431,6 +419,7 @@ public class Git {
     public static String MakeCommitFile(String author, String message) throws IOException, NoSuchAlgorithmException
     {
         String date = "October 2, 2024";
+        String treeHash = makeTreeForCommit();
         File Head = new File("git/HEAD");
         byte[] data = Files.readAllBytes(Head.toPath());
         String content = new String(data, StandardCharsets.UTF_8);
@@ -438,7 +427,7 @@ public class Git {
         File toCommit = new File("git/objects/hash.txt");
         Path commitPath = toCommit.toPath();
         BufferedWriter writer = Files.newBufferedWriter(commitPath);
-        writer.write("tree ");
+        writer.write("tree " + treeHash);
         writer.write("\nparent " + content);
         writer.write("\nauthor " + author);
         writer.write("\ndate " + date);
@@ -481,7 +470,6 @@ public class Git {
             BufferedWriter writer = Files.newBufferedWriter(newPath);
             byte[] data = Files.readAllBytes(pastFile.toPath());
             String content = new String(data, StandardCharsets.UTF_8);
-            System.out.println("the content I want to write is " + content);
             writer.write(content);
             writer.close();
             if (newFile.createNewFile())
@@ -502,8 +490,7 @@ public class Git {
     public static String makeTreeForCommit() throws NoSuchAlgorithmException, IOException
     {
         File snapshot = new File("./git/Snapshot");
-        addTree(snapshot);
-        return "";
+        return getDirectoryHash(snapshot);
     }
     //uses the index file to determine what to put in the snapshot.
 //Gets the specific hash for a directory
@@ -527,7 +514,6 @@ public static String getDirectoryHash(File file) throws NoSuchAlgorithmException
     hashes = allFiles.getBytes();
     String finalHash;
     finalHash = hashBlob(hashes);
-    System.out.println("the final hash is " + finalHash);
     return finalHash;
 }
 public static String hashBlob(byte[] data) throws IOException, NoSuchAlgorithmException {
