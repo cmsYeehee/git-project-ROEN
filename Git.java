@@ -490,6 +490,12 @@ public class Git {
         return;
 
     }
+    public static String makeTreeForCommit() throws NoSuchAlgorithmException, IOException
+    {
+        File snapshot = new File("./git/Snapshot");
+        addTree(snapshot);
+        return "";
+    }
     //uses the index file to determine what to put in the snapshot.
 }
 
