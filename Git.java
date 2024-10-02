@@ -35,7 +35,8 @@ public class Git {
 
         // Need to finish stretch goal 1 here by checking for and deleting all the
         // created directories and files
-        MakeCommitFile("Christian Stubbeman", "October 2, 2024", "testing");
+        MakeCommitFile("Christian Stubbeman", "testing");
+        MakeSnapshot();
 
     }
 
@@ -418,8 +419,9 @@ public class Git {
         return;
     }
 
-    public static String MakeCommitFile(String author, String date, String message) throws IOException, NoSuchAlgorithmException
+    public static String MakeCommitFile(String author, String message) throws IOException, NoSuchAlgorithmException
     {
+        String date = "October 2, 2024";
         File Head = new File("git/HEAD");
         byte[] data = Files.readAllBytes(Head.toPath());
         String content = new String(data, StandardCharsets.UTF_8);
@@ -438,6 +440,25 @@ public class Git {
             System.out.println("commit file outline made");
         }
         return "";
+    }
+    public static void MakeSnapshot()
+    {
+        File directory = new File("./");
+        File testSnapshot = new File("testSnapshot");
+        testSnapshot.mkdir();
+        for (File subfile : directory.listFiles())
+        {
+            if (subfile.isDirectory())
+            {
+                System.out.println(subfile.getName() + " is a dir");
+            }   
+            else
+            {
+                System.out.println(subfile.getName() + " is a file");
+            }
+        }
+        return;
+
     }
 }
 
