@@ -8,6 +8,7 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -37,7 +38,7 @@ public class Git {
 
         // Need to finish stretch goal 1 here by checking for and deleting all the
         // created directories and files
-        MakeCommitFile("Christian Stubbeman", "testing");
+        //MakeCommitFile("Christian Stubbeman", "testing");
         //MakeSnapshot();
     }
 
@@ -416,28 +417,33 @@ public class Git {
         return;
     }
 
-    public static String MakeCommitFile(String author, String message) throws IOException, NoSuchAlgorithmException
+    public static void MakeCommitFile(String author, String message) throws IOException, NoSuchAlgorithmException
     {
-        String date = "October 2, 2024";
+        Date d1 = new Date(); 
+        System.out.println("Current date is " + d1); 
         String treeHash = makeTreeForCommit();
         File Head = new File("git/HEAD");
         byte[] data = Files.readAllBytes(Head.toPath());
         String content = new String(data, StandardCharsets.UTF_8);
         System.out.println("The content is " + content);
-        File toCommit = new File("git/objects/hash.txt");
+        File toCommit = new File("git/objects/" + treeHash);
         Path commitPath = toCommit.toPath();
         BufferedWriter writer = Files.newBufferedWriter(commitPath);
         writer.write("tree " + treeHash);
         writer.write("\nparent " + content);
         writer.write("\nauthor " + author);
-        writer.write("\ndate " + date);
+        writer.write("\ndate " + d1);
         writer.write("\nmessage " + message);
+        writer.close();
+        Path headPath = Head.toPath();
+        BufferedWriter headwriter = Files.newBufferedWriter(headPath);
+        headwriter.write(treeHash);
         writer.close();
         if (toCommit.createNewFile() == true)
         {
             System.out.println("commit file outline made");
         }
-        return "";
+        return;
     }
     //Makes a snapshot
     public static void MakeSnapshot() throws NoSuchAlgorithmException, IOException
@@ -458,12 +464,15 @@ public class Git {
         br.close();
         for (int i = lines.size(); i > 1; i --)
         {
-            String theLine = lines.get(i-2);
+            String theLine = lines.get(i-1);
             System.out.println("the Line is " + theLine);
             if (theLine.substring(0,4).equals("blob"))
             {  
             String path = theLine.substring(46);
             File newFile = new File("./git/Snapshot/" + path);
+            if (newFile.createNewFile() == true)
+            {
+            }
             File pastFile = new File("./" + path);
             Path newPath = newFile.toPath();
             System.out.println("./" + path);
@@ -487,16 +496,11 @@ public class Git {
         return;
 
     }
-    //gets the Hash for this tree and updates HEAD
+    //gets the Hash for this tree
     public static String makeTreeForCommit() throws NoSuchAlgorithmException, IOException
     {
         File snapshot = new File("./git/Snapshot");
-        File Head = new File("./git/HEAD");
-        Path commitPath = Head.toPath();
         String str = getDirectoryHash(snapshot);
-        BufferedWriter writer = Files.newBufferedWriter(commitPath);
-        writer.write(str);
-        writer.close();
 
         return str;
     }
@@ -539,7 +543,10 @@ public static String hashBlob(byte[] data) throws IOException, NoSuchAlgorithmEx
             hash = "0" + hash;
         return hash;
     }
+public static void doACommit()
+{
 
+}
 // isFile()
 // isDirectory()
 // listFiles()
