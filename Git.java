@@ -435,6 +435,25 @@ public class Git {
         writer.write("\ndate " + d1);
         writer.write("\nmessage " + message);
         writer.close();
+        byte[] commitdata = Files.readAllBytes(commitPath);
+        String title = hashBlob(commitdata);
+        File finalVersion = new File("git/objects/" + title);
+        Path finalPath = finalVersion.toPath();
+        BufferedWriter finalWriter = Files.newBufferedWriter(finalPath);
+        finalWriter.write("tree " + treeHash);
+        finalWriter.write("\nparent " + content);
+        finalWriter.write("\nauthor " + author);
+        finalWriter.write("\ndate " + d1);
+        finalWriter.write("\nmessage " + message);
+        finalWriter.close();
+        if(toCommit.delete() == true)
+        {
+            System.out.println("replaced the commit file with the right one");
+        }
+        else{
+            System.out.println("Failed to reset the file");
+        }
+
         Path headPath = Head.toPath();
         BufferedWriter headwriter = Files.newBufferedWriter(headPath);
         headwriter.write(treeHash);
