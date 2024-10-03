@@ -48,5 +48,6 @@ public class CommitTester {
         test.MakeSnapshot();
         test.MakeCommitFile("Christian Stubbeman", "this is the first commit");
         System.out.println(test.makeTreeForCommit());
+        test.removeSnapshot();
     }
 }

@@ -608,6 +608,7 @@ public static void deleteDirectory(File file)
             subfile.delete();
         }
     }
+    file.delete();
 }
 // isFile()
 // isDirectory()
