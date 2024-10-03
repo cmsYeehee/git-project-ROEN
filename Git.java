@@ -443,6 +443,12 @@ public class Git {
         {
             System.out.println("commit file outline made");
         }
+        File index = new File("git/index");
+        ResetTestFile(index);
+        if( index.createNewFile() == true)
+        {
+            System.out.println("reset the index file");
+        }
         return;
     }
     //Makes a snapshot
