@@ -426,7 +426,7 @@ public class Git {
         byte[] data = Files.readAllBytes(Head.toPath());
         String content = new String(data, StandardCharsets.UTF_8);
         System.out.println("The content is " + content);
-        File toCommit = new File("git/objects/" + treeHash);
+        File toCommit = new File("git/" + treeHash);
         Path commitPath = toCommit.toPath();
         BufferedWriter writer = Files.newBufferedWriter(commitPath);
         writer.write("tree " + treeHash);
@@ -435,6 +435,7 @@ public class Git {
         writer.write("\ndate " + d1);
         writer.write("\nmessage " + message);
         writer.close();
+        //Now that we have this file made, we can get the hash for the actual file name.
         byte[] commitdata = Files.readAllBytes(commitPath);
         String title = hashBlob(commitdata);
         File finalVersion = new File("git/objects/" + title);
@@ -446,6 +447,7 @@ public class Git {
         finalWriter.write("\ndate " + d1);
         finalWriter.write("\nmessage " + message);
         finalWriter.close();
+        //Now to delete the past file with the wrong hash
         if(toCommit.delete() == true)
         {
             System.out.println("replaced the commit file with the right one");
@@ -487,7 +489,7 @@ public class Git {
             //Have to go from back to create directories
         }
         br.close();
-        for (int i = lines.size(); i > 1; i --)
+        for (int i = lines.size(); i > 0; i --)
         {
             String theLine = lines.get(i-1);
             System.out.println("the Line is " + theLine);
@@ -568,9 +570,44 @@ public static String hashBlob(byte[] data) throws IOException, NoSuchAlgorithmEx
             hash = "0" + hash;
         return hash;
     }
-public static void doACommit()
+public static void Stage(File toStage) throws NoSuchAlgorithmException, IOException
 {
-
+    if (toStage.isDirectory())
+    {
+        addTree(toStage);
+    }
+    else
+    {
+        createBlob(toStage);
+    }
+}
+public static void removeSnapshot()
+{
+    File snapshot = new File("git/Snapshot");
+    for (File subfile: snapshot.listFiles())
+    {
+        if (subfile.isDirectory())
+        {
+            deleteDirectory(subfile);
+        }
+        else{
+            subfile.delete();
+        }
+    }
+}
+public static void deleteDirectory(File file)
+{
+    File toDelete = file;
+    for (File subfile: toDelete.listFiles())
+    {
+        if (subfile.isDirectory())
+        {
+            deleteDirectory(subfile);
+        }
+        else{
+            subfile.delete();
+        }
+    }
 }
 // isFile()
 // isDirectory()
