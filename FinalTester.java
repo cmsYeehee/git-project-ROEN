@@ -20,7 +20,5 @@ public class FinalTester {
             writer.close();
         test.Stage(stageFile.toPath() + "");
         test.commit(author, message);
-
-
     }
 }
