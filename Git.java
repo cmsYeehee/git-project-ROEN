@@ -448,7 +448,7 @@ public class Git {
         //Now to update the head
         Path headPath = Head.toPath();
         BufferedWriter headwriter = Files.newBufferedWriter(headPath);
-        headwriter.write(treeHash);
+        headwriter.write(title);
         headwriter.close();
         File index = new File("git/index");
         ResetTestFile(index);
@@ -573,6 +573,8 @@ public static String getHeadStuff() throws IOException
     }
     br.close();
         File getObj = new File("./git/objects/" + content);
+        //Need to fix this so it reads the previous data.
+        
         byte[] previousStage = Files.readAllBytes(getObj.toPath());
         String previousData = new String(previousStage, StandardCharsets.UTF_8);
         return previousData;
