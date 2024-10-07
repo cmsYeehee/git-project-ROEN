@@ -421,22 +421,20 @@ public class Git {
     {
         Date d1 = new Date(); 
         System.out.println("Current date is " + d1); 
-        String treeHash = makeTreeForCommit();
+        String treeHash = MakeSnapshot();
         File Head = new File("git/HEAD");
         byte[] data = Files.readAllBytes(Head.toPath());
         String content = new String(data, StandardCharsets.UTF_8);
         System.out.println("The content is " + content);
-        File toCommit = new File("git/" + treeHash);
-        Path commitPath = toCommit.toPath();
-        BufferedWriter writer = Files.newBufferedWriter(commitPath);
-        writer.write("tree " + treeHash);
-        writer.write("\nparent " + content);
-        writer.write("\nauthor " + author);
-        writer.write("\ndate " + d1);
-        writer.write("\nmessage " + message);
-        writer.close();
+        //works on the string that needs to be hashed for the title of the commit file
+        String commitHash = "";
+        commitHash += "tree " + treeHash;
+        commitHash += "\nparent " + content;
+        commitHash += "\nauthor " + author;
+        commitHash += "\ndate " + d1;
+        commitHash += "\nmessage " + message;
         //Now that we have this file made, we can get the hash for the actual file name.
-        byte[] commitdata = Files.readAllBytes(commitPath);
+        byte[] commitdata = commitHash.getBytes();
         String title = hashBlob(commitdata);
         File finalVersion = new File("git/objects/" + title);
         Path finalPath = finalVersion.toPath();
@@ -447,23 +445,11 @@ public class Git {
         finalWriter.write("\ndate " + d1);
         finalWriter.write("\nmessage " + message);
         finalWriter.close();
-        //Now to delete the past file with the wrong hash
-        if(toCommit.delete() == true)
-        {
-            System.out.println("replaced the commit file with the right one");
-        }
-        else{
-            System.out.println("Failed to reset the file");
-        }
-
+        //Now to update the head
         Path headPath = Head.toPath();
         BufferedWriter headwriter = Files.newBufferedWriter(headPath);
         headwriter.write(treeHash);
-        writer.close();
-        if (toCommit.createNewFile() == true)
-        {
-            System.out.println("commit file outline made");
-        }
+        headwriter.close();
         File index = new File("git/index");
         ResetTestFile(index);
         if( index.createNewFile() == true)
@@ -473,54 +459,32 @@ public class Git {
         return;
     }
     //Makes a snapshot
-    public static void MakeSnapshot() throws NoSuchAlgorithmException, IOException
+    public static String MakeSnapshot() throws NoSuchAlgorithmException, IOException
     {
-        File Snapshot = new File("git/Snapshot");
-        Snapshot.mkdir();
         File index = new File("git/index");
         BufferedReader br = new BufferedReader(new FileReader(index));
         String line = br.readLine();
-        ArrayList<String> lines = new ArrayList<String>();
-        //Checking through index to determine what to add to the snapshot folder.
+        String lines = "";
+        lines = lines + line;
+        //Checking through index to determine what to add to the snapshot.
         while (line != null)
         {
-            lines.add(line);
+            lines += line;
+            lines += "\n";
             line = br.readLine();
-            //Have to go from back to create directories
         }
         br.close();
-        for (int i = lines.size(); i > 0; i --)
+        System.out.println(lines);
+        String hash = hashBlob(lines.getBytes());
+        File addToObj = new File("./git/objects/" + hash);
+        if (addToObj.createNewFile())
         {
-            String theLine = lines.get(i-1);
-            System.out.println("the Line is " + theLine);
-            if (theLine.substring(0,4).equals("blob"))
-            {  
-            String path = theLine.substring(46);
-            File newFile = new File("./git/Snapshot/" + path);
-            if (newFile.createNewFile() == true)
-            {
-            }
-            File pastFile = new File("./" + path);
-            Path newPath = newFile.toPath();
-            System.out.println("./" + path);
-            BufferedWriter writer = Files.newBufferedWriter(newPath);
-            byte[] data = Files.readAllBytes(pastFile.toPath());
-            String content = new String(data, StandardCharsets.UTF_8);
-            writer.write(content);
+            Path Path = addToObj.toPath();
+            BufferedWriter writer = Files.newBufferedWriter(Path);
+            writer.write(lines);
             writer.close();
-            if (newFile.createNewFile())
-            {
-                createBlob(pastFile);
-            }
-            }
-            else if (theLine.substring(0,4).equals("tree"))
-            {
-                String path = theLine.substring(46);
-                File dirToMake = new File("./git/Snapshot/" + path);
-                dirToMake.mkdir();
-            }
         }
-        return;
+        return hash;
 
     }
     //gets the Hash for this tree
@@ -570,29 +534,16 @@ public static String hashBlob(byte[] data) throws IOException, NoSuchAlgorithmEx
             hash = "0" + hash;
         return hash;
     }
-public static void Stage(File toStage) throws NoSuchAlgorithmException, IOException
+public static void Stage(String filepath) throws NoSuchAlgorithmException, IOException
 {
-    if (toStage.isDirectory())
+    File stageFile = new File("./" + filepath);
+    if (stageFile.listFiles() == null)
     {
-        addTree(toStage);
+        createBlob(stageFile);
     }
     else
     {
-        createBlob(toStage);
-    }
-}
-public static void removeSnapshot()
-{
-    File snapshot = new File("git/Snapshot");
-    for (File subfile: snapshot.listFiles())
-    {
-        if (subfile.isDirectory())
-        {
-            deleteDirectory(subfile);
-        }
-        else{
-            subfile.delete();
-        }
+        addTree(stageFile);
     }
 }
 public static void deleteDirectory(File file)
@@ -609,6 +560,12 @@ public static void deleteDirectory(File file)
         }
     }
     file.delete();
+}
+public static void commit(String author, String message) throws NoSuchAlgorithmException, IOException
+{
+    MakeSnapshot();
+    MakeCommitFile(author,message);
+    
 }
 // isFile()
 // isDirectory()
