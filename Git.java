@@ -527,7 +527,9 @@ public static String hashBlob(byte[] data) throws IOException, NoSuchAlgorithmEx
     }
 public static void Stage(String filepath) throws NoSuchAlgorithmException, IOException
 {
+    filepath = filepath.substring(2);
     File stageFile = new File(filepath);
+    System.out.println("The filepath is" + filepath);
     if (stageFile.listFiles() == null)
     {
         createBlob(stageFile);
