@@ -13,11 +13,13 @@ public class FinalTester {
         String message = "im testing a commit";
         test.initRepo();
         File stageFile = new File("./Staging");
-        if (stageFile.createNewFile())
-        {
-            test.Stage(stageFile.toPath() + "");
-            test.commit(author, message);
-        }
+        stageFile.createNewFile();
+            Path blob2Path = stageFile.toPath();
+            BufferedWriter writer = Files.newBufferedWriter(blob2Path);
+            writer.write("Hi this is a test");
+            writer.close();
+        test.Stage(stageFile.toPath() + "");
+        test.commit(author, message);
 
 
     }

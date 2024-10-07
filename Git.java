@@ -465,7 +465,6 @@ public class Git {
         BufferedReader br = new BufferedReader(new FileReader(index));
         String line = br.readLine();
         String lines = getHeadStuff();
-        lines = lines + line;
         //Checking through index to determine what to add to the snapshot.
         while (line != null)
         {
@@ -528,7 +527,7 @@ public static String hashBlob(byte[] data) throws IOException, NoSuchAlgorithmEx
     }
 public static void Stage(String filepath) throws NoSuchAlgorithmException, IOException
 {
-    File stageFile = new File("./" + filepath);
+    File stageFile = new File(filepath);
     if (stageFile.listFiles() == null)
     {
         createBlob(stageFile);
