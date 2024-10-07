@@ -464,7 +464,7 @@ public class Git {
         File index = new File("git/index");
         BufferedReader br = new BufferedReader(new FileReader(index));
         String line = br.readLine();
-        String lines = "";
+        String lines = getHeadStuff();
         lines = lines + line;
         //Checking through index to determine what to add to the snapshot.
         while (line != null)
@@ -486,14 +486,6 @@ public class Git {
         }
         return hash;
 
-    }
-    //gets the Hash for this tree
-    public static String makeTreeForCommit() throws NoSuchAlgorithmException, IOException
-    {
-        File snapshot = new File("./git/Snapshot");
-        String str = getDirectoryHash(snapshot);
-
-        return str;
     }
 
 
@@ -566,6 +558,23 @@ public static void commit(String author, String message) throws NoSuchAlgorithmE
     MakeSnapshot();
     MakeCommitFile(author,message);
     
+}
+public static String getHeadStuff() throws IOException
+{
+    File head = new File("./git/HEAD");
+    byte[] data = Files.readAllBytes(head.toPath());
+    String content = new String(data, StandardCharsets.UTF_8);
+    System.out.println("content is" + content);
+    BufferedReader br = new BufferedReader(new FileReader(head));   
+    if (br.readLine() == null) {
+        System.out.println("No errors, and file empty");
+        return "";
+    }
+    br.close();
+        File getObj = new File("./git/objects/" + content);
+        byte[] previousStage = Files.readAllBytes(getObj.toPath());
+        String previousData = new String(previousStage, StandardCharsets.UTF_8);
+        return previousData;
 }
 // isFile()
 // isDirectory()
