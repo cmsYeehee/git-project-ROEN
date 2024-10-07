@@ -569,14 +569,19 @@ public static String getHeadStuff() throws IOException
     BufferedReader br = new BufferedReader(new FileReader(head));   
     if (br.readLine() == null) {
         System.out.println("No errors, and file empty");
+        br.close();
         return "";
     }
-    br.close();
         File getObj = new File("./git/objects/" + content);
+        BufferedReader treeReader = new BufferedReader(new FileReader(getObj));
         //Need to fix this so it reads the previous data.
-        
-        byte[] previousStage = Files.readAllBytes(getObj.toPath());
+        String line = treeReader.readLine();
+        String nextpath = line.substring(5);
+        File tree = new File("./git/objects/" + nextpath);
+        byte[] previousStage = Files.readAllBytes(tree.toPath());
         String previousData = new String(previousStage, StandardCharsets.UTF_8);
+        br.close();
+        treeReader.close();
         return previousData;
 }
 // isFile()
