@@ -20,6 +20,6 @@ public class FinalTester {
             writer.close();
         test.Stage(stageFile.toPath() + "");
         test.commit(author, message);
-        test.checkout("93de3266c5a4e83399d0f3b85eda102ffeabdb51");
+        test.checkout("e019635febaf2457aeb0fd49039b9de5eba0b50c");
     }
 }

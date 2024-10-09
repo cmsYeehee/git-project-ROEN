@@ -654,7 +654,11 @@ public static void checkout(String commitHash) throws IOException
         System.out.println(comparisonLines + "this is the line");
     }
     comparisonReader.close();
-    System.out.println("Still need to update Head");
+    //Updating HEAD
+    BufferedWriter writer = Files.newBufferedWriter(head.toPath());
+    writer.write(commitHash);
+    writer.close();
+    
 }
 
 public static boolean InArr(ArrayList<String> arr, String str)
