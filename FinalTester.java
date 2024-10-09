@@ -18,8 +18,9 @@ public class FinalTester {
             BufferedWriter writer = Files.newBufferedWriter(blob2Path);
             writer.write("Hi this is a test");
             writer.close();
+        String commitHash = test.getInHead();
         test.Stage(stageFile.toPath() + "");
         test.commit(author, message);
-        test.checkout("e019635febaf2457aeb0fd49039b9de5eba0b50c");
+        test.checkout(commitHash);
     }
 }
