@@ -560,6 +560,7 @@ public static void commit(String author, String message) throws NoSuchAlgorithmE
     MakeCommitFile(author,message);
     
 }
+//Gets the previous commit tree to add it to the next tree file
 public static String getHeadStuff() throws IOException
 {
     File head = new File("./git/HEAD");
@@ -584,7 +585,90 @@ public static String getHeadStuff() throws IOException
         treeReader.close();
         return previousData;
 }
+public static void checkout(String commitHash) throws IOException
+{
+    File toCheckout = new File("./git/objects/" + commitHash);
+    BufferedReader br = new BufferedReader(new FileReader(toCheckout));
+    String firstLine = br.readLine();
+    System.out.println("The first line is" + firstLine);
+    String nextpath = firstLine.substring(5);
+    System.out.println("im checking out this original commit file " + nextpath);
+    File tree = new File("./git/objects/" + nextpath);
+    BufferedReader treeReader = new BufferedReader(new FileReader(tree));
+    String line = treeReader.readLine();
+    ArrayList<String> lines = new ArrayList<String>();
+    //Checking through index to determine what was in the directory.
+    while (line != null)
+    {
+        lines.add(line);
+        line = treeReader.readLine();
+        System.out.println(line + "is in the arraylist");
+        //Have to go from back to create directories
+    }
+    treeReader.close();
+    br.close();
+    // compares to current 
+    File head = new File("./git/HEAD");
+    byte[] data = Files.readAllBytes(head.toPath());
+    String content = new String(data, StandardCharsets.UTF_8);
+    File check = new File("./git/objects/" + content);
+    BufferedReader headReader = new BufferedReader(new FileReader(check));
+    String treeLine1 = headReader.readLine();
+    String toCheck = treeLine1.substring(5);
+    File comparison = new File("./git/objects/" + toCheck);
+    headReader.close();
+    BufferedReader comparisonReader = new BufferedReader(new FileReader(comparison));
+    String comparisonLines = comparisonReader.readLine();
+    System.out.println(comparisonLines + "this is the line");
+    String path = "";
+    
+    while (comparisonLines != null)
+    {
+        //removing files that aren't in the old directory
+        if (InArr(lines, comparisonLines) == false)
+        {
+            if (comparisonLines.substring(0,4).equals("tree"))
+            {
+                path = comparisonLines.substring(46);
+                File fileToDelete = new File("./" + path);
+                deleteDirectory(fileToDelete);
+                System.out.println("im deleting a directory");
+            }
+            else
+            {
+                
+                path = comparisonLines.substring(46);
+                File fileToDelete = new File("./" + path);
+                if (!fileToDelete.exists())
+                {
+                    
+                }
+                else{
+                    fileToDelete.delete();
+                    System.out.println("im deleting a file");
+                }
+            }
+            
+        }
+        comparisonLines = comparisonReader.readLine();
+        System.out.println(comparisonLines + "this is the line");
+    }
+    comparisonReader.close();
+    System.out.println("Still need to update Head");
+}
+
+public static boolean InArr(ArrayList<String> arr, String str)
+{
+    for( String thing: arr)
+    {
+        if (str.equals(thing))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+}
 // isFile()
 // isDirectory()
 // listFiles()
-} 
