@@ -672,6 +672,13 @@ public static boolean InArr(ArrayList<String> arr, String str)
     }
     return false;
 }
+public String getInHead() throws IOException
+{
+    File head = new File("./git/HEAD");
+    byte[] data = Files.readAllBytes(head.toPath());
+    String content = new String(data, StandardCharsets.UTF_8);
+    return content;
+}
 }
 // isFile()
 // isDirectory()
